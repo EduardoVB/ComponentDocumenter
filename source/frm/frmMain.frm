@@ -171,7 +171,6 @@ Begin VB.Form frmMain
       _ExtentX        =   1418
       _ExtentY        =   1588
       _Version        =   393217
-      Enabled         =   -1  'True
       TextRTF         =   $"frmMain.frx":07CC
    End
    Begin VB.TextBox txtParamsInfo 
@@ -3755,6 +3754,8 @@ Private Sub mnuImport_Click()
     Dim iIDToFind As Long
     Dim iDoNotUpdateParamsInfo As Boolean
     Dim iDoNotUpdateShortDescription As Boolean
+    Dim fp As Long
+    Dim iSkip As Boolean
     
     If mClasses Is Nothing Then Exit Sub
     If (mClasses.RecordCount > 0) Or (mControls.RecordCount > 0) Or (mEnums.RecordCount > 0) Then
@@ -3963,10 +3964,12 @@ Private Sub mnuImport_Click()
         mMethods.MoveFirst
         Do Until mMethods.EOF
             If mMethods!Auxiliary_Field <> 0 Then
-                mMethods.Edit
-                mMethods!Auxiliary_Field = 0
-                mMethods.Update
-                mMethods.Bookmark = mMethods.LastModified
+                If mMethods!Name <> "Print" Then
+                    mMethods.Edit
+                    mMethods!Auxiliary_Field = 0
+                    mMethods.Update
+                    mMethods.Bookmark = mMethods.LastModified
+                End If
             End If
             mMethods.MoveNext
         Loop
@@ -4022,10 +4025,19 @@ Private Sub mnuImport_Click()
             iTMembers.MoveFirst
             Do Until iTMembers.EOF
                 If iTMembers!Auxiliary_Field <> 1 Then
-                    iTMembers.Edit
-                    iTMembers!Auxiliary_Field = 1
-                    iTMembers.Update
-                    iTMembers.Bookmark = iTMembers.LastModified
+                    iSkip = False
+                    mMethods.Seek "=", iTMembers!Method_ID
+                    If Not mMethods.NoMatch Then
+                        If mMethods!Name = "Print" Then
+                            iSkip = True
+                        End If
+                    End If
+                    If Not iSkip Then
+                        iTMembers.Edit
+                        iTMembers!Auxiliary_Field = 1
+                        iTMembers.Update
+                        iTMembers.Bookmark = iTMembers.LastModified
+                    End If
                 End If
                 iTMembers.MoveNext
             Loop
@@ -4142,7 +4154,11 @@ Private Sub mnuImport_Click()
             If iMemberInfo.Parameters.Count > 0 Then
                 iStr = vbCrLf & "Additional parameter(s):" & vbCrLf
                 For c2 = 1 To iMemberInfo.Parameters.Count
-                    iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    If iMemberInfo.Parameters(c2).Name = "" Then
+                        iParamName = "<b>Index</b>"
+                    Else
+                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    End If
                     iLng = 28 - Len(iParamName)
                     If iLng < 1 Then iLng = 1
                     On Error Resume Next
@@ -4290,8 +4306,18 @@ Private Sub mnuImport_Click()
             iStr = ""
             If iMemberInfo.Parameters.Count > 0 Then
                 iStr = "Parameter(s):" & vbCrLf
-                For c2 = 1 To iMemberInfo.Parameters.Count
-                    iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                Select Case iMemberInfo.Name
+                    Case "Circle", "Line", "PSet", "Scale"
+                        fp = 2
+                    Case Else
+                        fp = 1
+                End Select
+                For c2 = fp To iMemberInfo.Parameters.Count
+                    If iMemberInfo.Parameters(c2).Name = "" Then
+                        iParamName = "<b>Index</b>"
+                    Else
+                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    End If
                     iLng = 28 - Len(iParamName)
                     If iLng < 1 Then iLng = 1
                     On Error Resume Next
@@ -4431,7 +4457,11 @@ Private Sub mnuImport_Click()
                 If iMemberInfo.Parameters.Count > 0 Then
                     iStr = "Parameter(s):" & vbCrLf
                     For c2 = 1 To iMemberInfo.Parameters.Count
-                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                        If iMemberInfo.Parameters(c2).Name = "" Then
+                            iParamName = "<b>Index</b>"
+                        Else
+                            iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                        End If
                         iLng = 28 - Len(iParamName)
                         If iLng < 1 Then iLng = 1
                         On Error Resume Next
@@ -4592,19 +4622,31 @@ Private Sub mnuImport_Click()
             Loop
         End If
         ' Methods
+        mMethods.Index = "PrimaryKey"
         Set iTMembers = mDatabase.OpenRecordset("SELECT * FROM Classes_Methods WHERE (Class_ID = " & mClasses!Class_ID & ")")
         If iTMembers.RecordCount > 0 Then
             iTMembers.MoveFirst
             Do Until iTMembers.EOF
                 If iTMembers!Auxiliary_Field <> 1 Then
-                    iTMembers.Edit
-                    iTMembers!Auxiliary_Field = 1
-                    iTMembers.Update
-                    iTMembers.Bookmark = iTMembers.LastModified
+                    iSkip = False
+                    mMethods.Seek "=", iTMembers!Method_ID
+                    If Not mMethods.NoMatch Then
+                        If mMethods!Name = "Print" Then
+                            iSkip = True
+                        End If
+                    End If
+                    If Not iSkip Then
+                        iTMembers.Edit
+                        iTMembers!Auxiliary_Field = 1
+                        iTMembers.Update
+                        iTMembers.Bookmark = iTMembers.LastModified
+                    End If
                 End If
                 iTMembers.MoveNext
             Loop
         End If
+        mMethods.Index = "Name"
+        
         ' Events
         Set iTMembers = mDatabase.OpenRecordset("SELECT * FROM Classes_Events WHERE (Class_ID = " & mClasses!Class_ID & ")")
         If iTMembers.RecordCount > 0 Then
@@ -4703,7 +4745,11 @@ Private Sub mnuImport_Click()
             If iMemberInfo.Parameters.Count > 0 Then
                 iStr = vbCrLf & "Additional parameter(s):" & vbCrLf
                 For c2 = 1 To iMemberInfo.Parameters.Count
-                    iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    If iMemberInfo.Parameters(c2).Name = "" Then
+                        iParamName = "<b>Index</b>"
+                    Else
+                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    End If
                     iLng = 28 - Len(iParamName)
                     If iLng < 1 Then iLng = 1
                     On Error Resume Next
@@ -4851,8 +4897,18 @@ Private Sub mnuImport_Click()
             iStr = ""
             If iMemberInfo.Parameters.Count > 0 Then
                 iStr = "Parameter(s):" & vbCrLf
-                For c2 = 1 To iMemberInfo.Parameters.Count
-                    iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                Select Case iMemberInfo.Name
+                    Case "Circle", "Line", "PSet", "Scale"
+                        fp = 2
+                    Case Else
+                        fp = 1
+                End Select
+                For c2 = fp To iMemberInfo.Parameters.Count
+                    If iMemberInfo.Parameters(c2).Name = "" Then
+                        iParamName = "<b>Index</b>"
+                    Else
+                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                    End If
                     iLng = 28 - Len(iParamName)
                     If iLng < 1 Then iLng = 1
                     iTypeName = ""
@@ -4861,6 +4917,30 @@ Private Sub mnuImport_Click()
                     On Error GoTo 0
                     If iTypeName = "" Then iTypeName = "[unknown]"
                     iOptional = (iMemberInfo.Parameters(c2).Flags And PARAMFLAG_FOPT) <> 0
+                    If (iMemberInfo.Name = "Circle") Then
+                        Select Case c2
+                            Case Is > 4
+                                iOptional = True
+                        End Select
+                    ElseIf iMemberInfo.Name = "Line" Then
+                        Select Case c2
+                            Case 4, 5
+                            Case Else
+                                iOptional = True
+                        End Select
+                    ElseIf iMemberInfo.Name = "PSet" Then
+                        Select Case c2
+                            Case Is > 3
+                                iOptional = True
+                        End Select
+                    ElseIf iMemberInfo.Name = "Scale" Then
+                        iOptional = True
+                    ElseIf iMemberInfo.Name = "PaintPicture" Then
+                        Select Case c2
+                            Case Is > 3
+                                iOptional = True
+                        End Select
+                    End If
                     If iOptional Then
                         On Error Resume Next
                         iDefaultValue = ""
@@ -4992,7 +5072,11 @@ Private Sub mnuImport_Click()
                 If iMemberInfo.Parameters.Count > 0 Then
                     iStr = "Parameter(s):" & vbCrLf
                     For c2 = 1 To iMemberInfo.Parameters.Count
-                        iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                        If iMemberInfo.Parameters(c2).Name = "" Then
+                            iParamName = "<b>Index</b>"
+                        Else
+                            iParamName = "<b>" & iMemberInfo.Parameters(c2).Name & "</b>"
+                        End If
                         iLng = 28 - Len(iParamName)
                         If iLng < 1 Then iLng = 1
                         iTypeName = ""
@@ -5318,18 +5402,18 @@ Private Sub mnuNewComponentDB_Click()
     
     iComponentName = Trim$(InputBox("Enter the component name", "New component database"))
     If iComponentName <> "" Then
-        If FileExists(App.Path & "\databases\" & iComponentName & ".mdb") Then
+        If FileExists(App_Path & "\databases\" & iComponentName & ".mdb") Then
             c = 1
-            Do Until Not FileExists(App.Path & "\databases\" & iComponentName & "_" & CStr(c) & ".mdb")
+            Do Until Not FileExists(App_Path & "\databases\" & iComponentName & "_" & CStr(c) & ".mdb")
                 c = c + 1
             Loop
-            mCurrentDBPath = App.Path & "\databases\" & iComponentName & "_" & CStr(c) & ".mdb"
+            mCurrentDBPath = App_Path & "\databases\" & iComponentName & "_" & CStr(c) & ".mdb"
         Else
-            mCurrentDBPath = App.Path & "\databases\" & iComponentName & ".mdb"
+            mCurrentDBPath = App_Path & "\databases\" & iComponentName & ".mdb"
         End If
         
-        If Not FileExists(App.Path & "\BlankDB.mdb") Then
-            MsgBox "Error, " & App.Path & "\BlankDB.mdb" & " not found.", vbCritical
+        If Not FileExists(App_Path & "\BlankDB.mdb") Then
+            MsgBox "Error, " & App_Path & "\BlankDB.mdb" & " not found.", vbCritical
             Exit Sub
         End If
         If Not mDatabase Is Nothing Then
@@ -5341,7 +5425,7 @@ Private Sub mnuNewComponentDB_Click()
             MsgBox "Error: folder " & GetFolder(mCurrentDBPath) & " does not exist.", vbCritical
             Exit Sub
         End If
-        FileCopy App.Path & "\BlankDB.mdb", mCurrentDBPath
+        FileCopy App_Path & "\BlankDB.mdb", mCurrentDBPath
         
         mSelectedType = 0
         mSelectedID = 0
@@ -6211,7 +6295,7 @@ Private Property Get App_Path()
     Static sValue As String
     
     If sValue = "" Then
-        sValue = App.Path
+        sValue = App_Path
         If Right$(sValue, 1) = "\" Then
             sValue = Left$(sValue, Len(sValue) - 1)
         End If
@@ -7752,7 +7836,7 @@ Private Function TxtToHTML(nTxt As String, Optional nSource As String) As String
                 iStr = Replace(iStr, vbCr, "")
                 TxtToHTML = Left$(TxtToHTML, iPos1 - 1) & "<pre>" & iStr & "</pre>" & Mid$(TxtToHTML, iPos2 + 7)
             End If
-            iPos1 = InStr(TxtToHTML, "[code]")
+            iPos1 = InStr(iPos1 + 1, TxtToHTML, "[code]")
         Loop
     End If
     
@@ -8324,7 +8408,7 @@ Private Sub Printer_NewPage()
     Printer.CurrentY = mMargin
 End Sub
 
-Public Sub PrintRTB(nRTB As RichTextBox)
+Private Sub PrintRTB(nRTB As RichTextBox)
     Dim LeftOffset As Long, TopOffset As Long
     Dim LeftMargin As Long, TopMargin As Long
     Dim RightMargin As Long, BottomMargin As Long

@@ -86,22 +86,22 @@ Private Sub Form_Load()
     Dim iGi As Recordset
     
     Set Me.Icon = gIcon
-    If Not FolderExists(App.Path & "\databases") Then
+    If Not FolderExists(App_Path & "\databases") Then
         MsgBox "Database folders does not exist", vbCritical
         Unload Me
         Exit Sub
     End If
     mPaths = Split("")
-    iFile = Dir(App.Path & "\databases\*.mdb")
+    iFile = Dir(App_Path & "\databases\*.mdb")
     On Error GoTo FileErr
     Do Until iFile = ""
-        Set iDb = DBEngine.OpenDatabase(App.Path & "\databases\" & iFile)
+        Set iDb = DBEngine.OpenDatabase(App_Path & "\databases\" & iFile)
         Set iGi = iDb.OpenRecordset("General_Information")
         iGi.Index = "Name"
         iGi.Seek "=", "ComponentName"
         If Not iGi.NoMatch Then
             ReDim Preserve mPaths(UBound(mPaths) + 1)
-            mPaths(UBound(mPaths)) = App.Path & "\databases\" & iFile
+            mPaths(UBound(mPaths)) = App_Path & "\databases\" & iFile
             lstComponentsDB.AddItem iGi!Value & " (" & iFile & ")"
         End If
         iDb.Close

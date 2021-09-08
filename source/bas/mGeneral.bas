@@ -242,7 +242,7 @@ Public Function AppPath4Reg() As String
     Static sValue As String
     
     If sValue = "" Then
-        sValue = Replace(App.Path, "\", "_")
+        sValue = Replace(App_Path, "\", "_")
     End If
     
     AppPath4Reg = sValue
@@ -366,4 +366,6 @@ errorHandler:
     End If
 End Function
 
-
+Public Property Get App_Path() As String
+    App_Path = App.Path
+End Property
