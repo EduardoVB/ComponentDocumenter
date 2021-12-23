@@ -171,6 +171,7 @@ Begin VB.Form frmMain
       _ExtentX        =   1418
       _ExtentY        =   1588
       _Version        =   393217
+      Enabled         =   -1  'True
       TextRTF         =   $"frmMain.frx":07CC
    End
    Begin VB.TextBox txtParamsInfo 
@@ -6289,19 +6290,6 @@ End Sub
 Private Sub txtShortDescription_Validate(Cancel As Boolean)
     UpdateData
 End Sub
-
-
-Private Property Get App_Path()
-    Static sValue As String
-    
-    If sValue = "" Then
-        sValue = App_Path
-        If Right$(sValue, 1) = "\" Then
-            sValue = Left$(sValue, Len(sValue) - 1)
-        End If
-    End If
-    App_Path = sValue
-End Property
 
 Private Property Get DBPath()
     Static sValue As String

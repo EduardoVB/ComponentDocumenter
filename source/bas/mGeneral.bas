@@ -367,5 +367,13 @@ errorHandler:
 End Function
 
 Public Property Get App_Path() As String
-    App_Path = App.Path
+    Static sValue As String
+    
+    If sValue = "" Then
+        sValue = App.Path
+        If Right$(sValue, 1) = "\" Then
+            sValue = Left$(sValue, Len(sValue) - 1)
+        End If
+    End If
+    App_Path = sValue
 End Property
