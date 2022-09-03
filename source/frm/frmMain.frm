@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "richtx32.ocx"
+Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Object = "{6B7E6392-850A-101B-AFC0-4210102A8DA7}#1.3#0"; "COMCTL32.OCX"
 Begin VB.Form frmMain 
    Caption         =   "Component Documenter"
@@ -171,7 +171,6 @@ Begin VB.Form frmMain
       _ExtentX        =   1418
       _ExtentY        =   1588
       _Version        =   393217
-      Enabled         =   -1  'True
       TextRTF         =   $"frmMain.frx":07CC
    End
    Begin VB.TextBox txtParamsInfo 
@@ -2908,6 +2907,7 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 End Sub
 
 Private Sub Form_Resize()
+    If Me.WindowState <> vbNormal Then Exit Sub
     If Me.Width < 9700 Then Me.Width = 9700
     If Me.Height < 8000 Then Me.Height = 8000
     
