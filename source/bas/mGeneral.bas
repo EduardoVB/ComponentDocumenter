@@ -43,19 +43,27 @@ Public Function ConvertToUTF8(ByRef Source As String) As Byte()
   Dim Pointer As Long
   Dim Size As Long
   Dim Buffer() As Byte
+  Const CP_ACP As Long = 0
   
   If Len(Source) > 0 Then
     length = Len(Source)
     Pointer = StrPtr(Source)
     Size = WideCharToMultiByte(CP_UTF8, 0, Pointer, length, 0, 0, 0, 0)
     If Size > 0 Then
-      ReDim Buffer(0 To Size - 1)
-      
-      WideCharToMultiByte CP_UTF8, 0, Pointer, length, VarPtr(Buffer(0)), Size, 0, 0
-      ConvertToUTF8 = Buffer
+        ReDim Buffer(0 To Size - 1)
+        
+        WideCharToMultiByte CP_UTF8, 0, Pointer, length, VarPtr(Buffer(0)), Size, 0, 0
+        ConvertToUTF8 = Buffer
+    Else
+        Size = WideCharToMultiByte(CP_ACP, 0, Pointer, length, 0, 0, 0, 0)
+        If Size > 0 Then
+            ReDim Buffer(0 To Size - 1)
+            
+            WideCharToMultiByte CP_ACP, 0, Pointer, length, VarPtr(Buffer(0)), Size, 0, 0
+            ConvertToUTF8 = Buffer
+        End If
     End If
   End If
-  
 End Function
 
 Public Function GetTempDir() As String
@@ -165,7 +173,7 @@ Public Function RTFItalic(nText As String) As String
     RTFItalic = "\i " & nText & "\i0 "
 End Function
 
-Public Function AddToList(nList, nValue, Optional nOnlyIfMissing As Boolean, Optional nFirstElement As Long = 0) As Boolean
+Public Function AddToList(nList As Variant, nValue As Variant, Optional nOnlyIfMissing As Boolean, Optional nFirstElement As Long = 0) As Boolean
     Dim i As Long
     Dim iAdd As Boolean
     
@@ -182,7 +190,7 @@ Public Function AddToList(nList, nValue, Optional nOnlyIfMissing As Boolean, Opt
     End If
 End Function
 
-Public Function IsInList(nList, nValue, Optional nFirstElement As Long = 0, Optional nLastElement As Long = -1) As Boolean
+Public Function IsInList(nList As Variant, nValue As Variant, Optional nFirstElement As Long = 0, Optional nLastElement As Long = -1) As Boolean
     Dim c As Long
     
     If nLastElement = -1 Then
@@ -201,7 +209,7 @@ Public Function IsInList(nList, nValue, Optional nFirstElement As Long = 0, Opti
     Next c
 End Function
 
-Public Function IndexInList(nList, nValue) As Long
+Public Function IndexInList(nList As Variant, nValue As Variant) As Long
     Dim c As Long
     
     IndexInList = LBound(nList) - 1

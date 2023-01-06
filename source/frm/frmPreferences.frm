@@ -43,7 +43,7 @@ Begin VB.Form frmPreferences
       Width           =   1092
    End
    Begin VB.CommandButton cmdChooseFont 
-      Caption         =   "···"
+      Caption         =   "Â·Â·Â·"
       BeginProperty Font 
          Name            =   "Segoe UI"
          Size            =   12
@@ -135,7 +135,7 @@ Private Sub lblFont_Click()
     cmdChooseFont_Click
 End Sub
 
-Private Function CloneFont(nOrigFont) As StdFont
+Private Function CloneFont(nOrigFont As StdFont) As StdFont
     Dim iFont As New StdFont
     
     If nOrigFont Is Nothing Then Exit Function

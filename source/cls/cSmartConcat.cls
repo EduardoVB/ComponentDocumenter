@@ -37,7 +37,7 @@ Public Function GenerateCurrentString() As String
     End If
 End Function
 
-Public Function ClearStrings()
+Public Sub ClearStrings()
     Dim l As Long
     If m_SmallIndex Then
         For l = 0 To m_SmallIndex - 1
@@ -49,7 +49,7 @@ Public Function ClearStrings()
     m_CurrentMediumIndex = 0
     m_CurrentMediumSize = 0
     Erase m_MediumStrings
-End Function
+End Sub
 
 Public Sub AddString(NewString As String)
     Dim NewLen As Long

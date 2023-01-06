@@ -74,7 +74,7 @@ Begin VB.Form frmMain
       Height          =   312
       Left            =   6720
       MaskColor       =   &H00FFFFFF&
-      Picture         =   "frmMain.frx":048A
+      Picture         =   "frmMain.frx":058A
       Style           =   1  'Graphical
       TabIndex        =   16
       ToolTipText     =   "Add link tag to reference something"
@@ -111,7 +111,7 @@ Begin VB.Form frmMain
       Top             =   6240
    End
    Begin VB.CommandButton cmdAppliesTo 
-      Caption         =   "···"
+      Caption         =   "Â·Â·Â·"
       BeginProperty Font 
          Name            =   "Segoe UI"
          Size            =   12
@@ -171,7 +171,7 @@ Begin VB.Form frmMain
       _ExtentX        =   1418
       _ExtentY        =   1588
       _Version        =   393217
-      TextRTF         =   $"frmMain.frx":07CC
+      TextRTF         =   $"frmMain.frx":08CC
    End
    Begin VB.TextBox txtParamsInfo 
       BeginProperty Font 
@@ -2907,24 +2907,24 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 End Sub
 
 Private Sub Form_Resize()
-    If Me.WindowState <> vbNormal Then Exit Sub
-    If Me.Width < 9700 Then Me.Width = 9700
-    If Me.Height < 8000 Then Me.Height = 8000
-    
-    If Me.WindowState <> vbMinimized Then
-        trv1.Height = Me.ScaleHeight - (trv1.Top * 2)
-        If Me.ScaleWidth < 10000 Then
-            trv1.Width = 3000
-        ElseIf Me.ScaleWidth < 12000 Then
-            trv1.Width = 4200
-        ElseIf Me.ScaleWidth < 14000 Then
-            trv1.Width = 5000
-        Else
-            trv1.Width = 5800
-        End If
-        SetFontsTo GetDesiredFontSize
-        PlaceDataControls
+    If Me.WindowState = vbMinimized Then Exit Sub
+    If Me.WindowState = vbNormal Then
+        If Me.Width < 9700 Then Me.Width = 9700
+        If Me.Height < 8000 Then Me.Height = 8000
     End If
+    
+    trv1.Height = Me.ScaleHeight - (trv1.Top * 2)
+    If Me.ScaleWidth < 10000 Then
+        trv1.Width = 3000
+    ElseIf Me.ScaleWidth < 12000 Then
+        trv1.Width = 4200
+    ElseIf Me.ScaleWidth < 14000 Then
+        trv1.Width = 5000
+    Else
+        trv1.Width = 5800
+    End If
+    SetFontsTo GetDesiredFontSize
+    PlaceDataControls
 End Sub
 
 Private Function GetDesiredFontSize() As Single
@@ -4675,7 +4675,8 @@ Private Sub mnuImport_Click()
         End If
         
         For m = 1 To iTypeInfo.Members.Count
-            If iTypeInfo.Members(m).AttributeMask = 0 Then  ' Not hidden
+            'If iTypeInfo.Members(m).AttributeMask = 0 Then  ' Not hidden
+            If (iTypeInfo.Members(m).AttributeMask And &H41&) = 0 Then  ' Not hidden
                 iIk = iTypeInfo.Members(m).InvokeKind
                 If iIk = INVOKE_FUNC Then
                     AddToList iMethods, m
@@ -6291,7 +6292,7 @@ Private Sub txtShortDescription_Validate(Cancel As Boolean)
     UpdateData
 End Sub
 
-Private Property Get DBPath()
+Private Property Get DBPath() As String
     Static sValue As String
     
     If sValue = "" Then
@@ -8326,7 +8327,7 @@ Private Sub LoadReportingOptions()
     mHTML_PageFooter = Replace$(mHTML_PageFooter_Template, "[COMPONENT_NAME]", mComponentName)
 End Sub
 
-Private Sub PrintCentered(Optional nText As String, Optional ByVal nLeft, Optional ByVal nTop, Optional ByVal nWidth, Optional ByVal nHeight)
+Private Sub PrintCentered(Optional nText As String, Optional ByVal nLeft As Variant, Optional ByVal nTop As Variant, Optional ByVal nWidth As Variant, Optional ByVal nHeight As Variant)
     Dim iHeight As Single
     Dim iWidth As String
     Dim iText() As String
@@ -8352,7 +8353,7 @@ Private Sub PrintCentered(Optional nText As String, Optional ByVal nLeft, Option
     Next
 End Sub
 
-Private Sub PrintCenteredTop(Optional nText As String, Optional ByVal nLeft, Optional ByVal nTop, Optional ByVal nWidth, Optional ByVal nHeight)
+Private Sub PrintCenteredTop(Optional nText As String, Optional ByVal nLeft As Variant, Optional ByVal nTop As Variant, Optional ByVal nWidth As Variant, Optional ByVal nHeight As Variant)
     Dim iWidth As String
     Dim iText() As String
     Dim c As Long
@@ -8686,7 +8687,7 @@ Private Function IsMemberNameUnique(nMemberType As Long, nMemberName As String) 
     IsMemberNameUnique = (iRec.RecordCount = 1)
 End Function
 
-Private Function ParamsInfoAreTheSame(ByVal nParamsInfo1 As String, ByVal nParamsInfo2 As String)
+Private Function ParamsInfoAreTheSame(ByVal nParamsInfo1 As String, ByVal nParamsInfo2 As String) As Boolean
     nParamsInfo1 = RemoveNAADT(nParamsInfo1)
     nParamsInfo2 = RemoveNAADT(nParamsInfo2)
     nParamsInfo1 = SeparateWordsOneSpace(nParamsInfo1)
