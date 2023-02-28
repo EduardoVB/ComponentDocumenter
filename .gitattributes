@@ -9,7 +9,7 @@
 .ctl        text=auto eol=crlf
 .dob        text=auto eol=crlf
 .dsr        text=auto eol=crlf
-.frm        text eol=crlf
+.frm        working-tree-encoding=CP1252 text eol=crlf linguist-language=vb6
 .pag        text=auto eol=crlf
 .vbg        text=auto eol=crlf
 .vbl        text=auto eol=crlf
