@@ -15,7 +15,6 @@
 .vbl        text=auto eol=crlf
 .vbp        text=auto eol=crlf
 .vbr        text=auto eol=crlf
-.vbw        text=auto eol=crlf
  
 # Other source files (show diff + LF only in zip download)
 
